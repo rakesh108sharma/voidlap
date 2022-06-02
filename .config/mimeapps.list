@@ -1,0 +1,18 @@
+[Default Applications]
+text/plain=vim.desktop
+text/x-shellscript=vim.desktop
+audio/webm=mpv.desktop;
+audio/x-matroska=mpv.desktop;
+audio/mpeg=mpv.desktop;
+image/*=vimiv.desktop;
+image/jpeg=vimiv.desktop;
+image/jpg=vimiv.desktop;
+image/png=vimiv.desktop;
+video/mp4=mpv.desktop;
+video/webm=mpv.desktop;
+video/x-msvideo=mpv.desktop;
+video/x-flv=mpv.desktop;
+video/x-matroska=mpv.desktop;
+x-scheme-handler/magnet=torrent.desktop;
+application/x.bittorrent=torrent.desktop;
+
