@@ -1,0 +1,159 @@
+# interpreter for shell commands (needs to be POSIX compatible)
+set shell sh
+
+# set '-eu' options for shell commands
+# These options are used to have safer shell commands. Option '-e' is used to
+# exit on error and option '-u' is used to give error for unset variables.
+# Option '-f' disables pathname expansion which can be useful when $f, $fs, and
+# $fx variables contain names with '*' or '?' characters. However, this option
+# is used selectively within individual commands as it can be limiting at
+# times.
+set shellopts '-eu'
+
+# set internal field separator (IFS) to "\n" for shell commands
+# This is useful to automatically split file names in $fs and $fx properly
+# since default file separator used in these variables (i.e. 'filesep' option)
+# is newline. You need to consider the values of these options and create your
+# commands accordingly.
+set ifs "\n"
+
+# leave some space at the top and the bottom of the screen
+set scrolloff 10
+
+# use enter for shell commands
+map <enter> shell
+
+# execute current file (must be executable)
+map x $$f
+#map X !$f
+map X $chmod +x $f
+
+# dedicated keys for file opener actions
+map o &mimeopen $f
+map O $mimeopen --ask $f
+
+# define a custom 'open' command
+# This command is called when current file is not a directory. You may want to
+# use either file extensions and/or mime types here. Below uses an editor for
+# text files and a file opener for the rest.
+cmd open ${{
+#    [ ${f##*.} = "m3u" ] && mpv $fx && exit
+#    [ ${f##*.} = "m4a" ] && mpv $fx && exit
+#    [ ${f##*.} = "mp3" ] && mpv $fx && exit
+    case $(file -L --mime-type $f -b) in
+        text/html) chromium $fx;;
+        text/*) $EDITOR $fx;;
+        video/*) mpv $fx;;
+        audio/*) mpv $fx;;
+        image/*) sxiv $fx;;
+        *pdf) mupdf $fx;;
+        *) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;;
+    esac
+}}
+
+# define a custom 'rename' command without prompt for overwrite
+# cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
+# map r push :rename<space>
+
+# make sure trash folder exists
+%mkdir -p ~/.trash
+
+# move current file or selected files to trash folder
+# (also see 'man mv' for backup/overwrite options)
+cmd trash %set -f; mv $fx ~/.trash
+cmd empty-trash %set -f; cd ~/.trash; rm -Ir \\*
+# define a custom 'delete' command
+# cmd delete ${{
+#     set -f
+#     printf "$fx\n"
+#     printf "delete?[y/n]"
+#     read ans
+#     [ $ans = "y" ] && rm -rf $fx
+# }}
+
+# use '<delete>' key for either 'trash' or 'delete' command
+#map <delete> trash
+#map D empty-trash 
+map t trash
+map T empty-trash
+# map <delete> delete
+
+# extract the current file with the right command
+# (xkcd link: https://xkcd.com/1168/)
+cmd extract ${{
+    set -f
+    case $f in
+        *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjvf $f;;
+        *.tar.gz|*.tgz) tar xzvf $f;;
+        *.tar.xz|*.txz) tar xJvf $f;;
+        *.zip) unzip $f;;
+        *.rar) unrar x $f;;
+        *.7z) 7z x $f;;
+    esac
+}}
+
+# compress current file or selected files with tar and gunzip
+cmd tar ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    tar czf $1.tar.gz $1
+    rm -rf $1
+}}
+
+# compress current file or selected files with zip
+cmd zip ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    zip -r $1.zip $1
+    rm -rf $1
+}}
+
+#################################
+set previewer ~/bin/prev
+map i $~/bin/prev $f | most 
+
+set ratios 1:2
+set drawbox true
+set icons true
+set incsearch
+
+map . set hidden!
+
+# 'v' must be a link to 'vim-huge' in ~/bin
+map e $v $f
+
+# play a whole "directory" OR a ripped DVD
+map P $mpv $f
+
+# CD-section
+map gt cd ~/.trash
+map ge cd /etc
+map gs cd /var/service
+map g. cd ~/.dot
+map gd cd ~/downloads/torrents
+map gu cd /usr/share
+map gc cd ~/.config
+map gm cd /media
+map gl cd /media/sdc4-ata-ST1000LM048-2E71/home/svami/_LERNEN/TTC\ -\ Learning\ Spanish
+map gE cd ~/SPANISH/TTC\ -\ Learning\ Spanish
+map ga cd ~/audio
+map gv cd ~/video
+
+# CONFIG-section
+map -b $v ~/.bashrc
+map -x $v ~/bin/autostart.sh ~/.xinitrc
+map -l $v ~/.config/lf/lfrc
+map -p $v ~/bin/prev
+map -m $v ~/.config/mimeapps.list
+map -w $v ~/.suckless/dwm/config.h
+map -q $v ~/.config/qtile/config.py
+map -r $sudo nano /etc/resolv.conf 
+
+# DIVERS
+cmd dragon %dragon -a -x $fx
+cmd dragon-individual %dragon $fx 
+map ++ dragon
+map +i dragon-individual
+
