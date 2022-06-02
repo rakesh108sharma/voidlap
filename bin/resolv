@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# choose DNS server AND write to resolv.conf
+
+### functions
+get_dns() {
+    dns=$(head -n 1 /etc/resolv.conf) || exit 1
+}
+### END functions
+
+# get actual DNS
+get_dns
+
+# give choices to change DNS
+choice=$(echo "\
+127.0.0.1
+192.168.1.1
+1.1.1.1
+9.9.9.9
+8.8.8.8
+" | dmenu -p "actual DNS: ${dns}   --   choose new DNS ==> ")
+
+[ -z "$choice" ] && exit 1
+
+# set new DNS
+echo "nameserver ${choice}" | sudo tee /etc/resolv.conf || herber "ERROR"
+
+# show new DNS
+get_dns
+herbe "DNS changed to  -->   ${dns}"

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# !! CRONTAB !!
+# update system automatically
+
+##### BEGIN
+
+export DISPLAY=:0.0
+
+sleep 5
+
+if doas xbps-install -Suy; then
+    herbe "updating..."
+else
+    herber "update FAILED!" " " "...please check manually!"
+fi
+
+exit 0
+
+##### END

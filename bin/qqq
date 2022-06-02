@@ -1,0 +1,21 @@
+#!/bin/env bash
+#
+# my poweroff
+
+##### BEGIN
+
+amixer set Master 20%
+
+mimic "system halt!"
+
+clear
+
+vnstat
+
+sleep 10
+
+sudo poweroff
+
+exit 0
+
+##### END
